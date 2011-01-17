@@ -1,4 +1,5 @@
-require 'gnomecanvas2'
+#require 'gnomecanvas2'
+require 'gtk2'
 
 class TimerWindow
   def initialize(width, height)
