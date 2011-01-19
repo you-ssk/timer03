@@ -24,7 +24,10 @@ class TimerWindow
     end
     @window.signal_connect("expose_event") do
       width,height = @window.default_size
-      @gc.set_foreground(Gdk::Color.new(65535,0,0))
+      red = Gdk::Color.new(65535,0,0)
+      colormap = Gdk::Colormap.system
+      colormap.alloc_color(red,false,true)
+      @gc.set_foreground(red)
       @drawable.draw_rectangle(@gc,true,0,0,width,height)
       @gc.set_foreground(Gdk::Color.new(0,65535,0))
       @drawable.draw_line(@gc,0,0,width,height)
