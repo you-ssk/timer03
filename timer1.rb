@@ -1,6 +1,15 @@
 #require 'gnomecanvas2'
 require 'gtk2'
 
+class Color
+  @@color_table = Hash.new do |h,k|
+    h[k] = Gdk::Color.parse(k)
+  end
+  def self.[](key)
+    @@color_table[key]
+  end
+end
+
 class TimerWindow
   def initialize(width, height)
     init_window(width, height)
@@ -23,17 +32,16 @@ class TimerWindow
       Gtk.main_quit
     end
     @window.signal_connect("expose_event") do
-      width,height = @window.default_size
-      red = Gdk::Color.new(65535,0,0)
-      green = Gdk::Color.new(0,65535,0)
-      colormap = Gdk::Colormap.system
-      colormap.alloc_color(red,false,true)
-      colormap.alloc_color(green,false,true)
-      @gc.set_foreground(red)
-      @drawable.draw_rectangle(@gc,true,0,0,width,height)
-      @gc.set_foreground(green)
-      @drawable.draw_line(@gc,0,0,width,height)
+      draw
     end
+  end
+
+  def draw
+    width,height = @window.default_size
+    @gc.set_rgb_fg_color(Color["blue"])
+    @drawable.draw_rectangle(@gc,true,0,0,width,height)
+    @gc.set_rgb_fg_color(Color["#00FF00"])
+    @drawable.draw_line(@gc,0,0,width,height)
   end
 
   def init_gc
