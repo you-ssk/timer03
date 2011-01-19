@@ -42,6 +42,9 @@ class TimerWindow
     @drawable.draw_rectangle(@gc,true,0,0,width,height)
     @gc.set_rgb_fg_color(Color["#00FF00"])
     @drawable.draw_line(@gc,0,0,width,height)
+    @gc.set_rgb_fg_color(Color["#FF0000"])
+    @drawable.draw_line(@gc,width,0,0,height)
+
   end
 
   def init_gc
