@@ -14,7 +14,6 @@ class TimerWindow
   def initialize(width, height)
     init_window(width, height)
     init_gc
-    init_pixmap
     init_timer
   end
 
@@ -33,14 +32,13 @@ class TimerWindow
     @gc = Gdk::GC.new(@drawable)
   end
 
-  def init_pixmap
-#    @pixmap = Gdk::Pixmap.new(@window,
-  end
   def init_timer
     @time = Time.now
-    Gtk::timeout_add(100) do
-      draw
-      draw_text
+    Gtk::timeout_add(10) do
+      if Time.now - @time > 1.0
+        draw_pixmap(@window.window)
+        @time = Time.now
+      end
       true
     end
   end
@@ -50,29 +48,43 @@ class TimerWindow
       Gtk.main_quit
     end
     @window.signal_connect("expose_event") do
-      draw
-      draw_text
+      draw_pixmap(@window.window)
     end
   end
 
-  def draw
-    width,height = @window.size
-    @gc.set_rgb_fg_color(Color["blue"])
-    @drawable.draw_rectangle(@gc,true,0,0,width,height)
-    @gc.set_rgb_fg_color(Color["#00FF00"])
-    @drawable.draw_line(@gc,0,0,width,height)
-    @gc.set_rgb_fg_color(Color["#FF0000"])
-    @drawable.draw_line(@gc,width,0,0,height)
+  def draw(drawable)
+    gc = Gdk::GC.new(drawable)
+    width,height = drawable.size
+    gc.set_rgb_fg_color(Color["blue"])
+    drawable.draw_rectangle(gc,true,0,0,width,height)
+    gc.set_rgb_fg_color(Color["#00FF00"])
+    drawable.draw_line(gc,0,0,width,height)
+    gc.set_rgb_fg_color(Color["#FF0000"])
+    drawable.draw_line(gc,width,0,0,height)
   end
 
-  def draw_text
-    width,height = @window.size
-    layout = Pango::Layout.new(@window.pango_context)
+  def draw_text(drawable)
+    gc = Gdk::GC.new(drawable)
+    width,height = drawable.size
+    font = Pango::FontDescription.new("Ubuntu 40")
+    context = Gdk::Pango.context
+    context.font_description = font
+    layout = Pango::Layout.new(context)
     layout.width = width*Pango::SCALE
     layout.set_alignment(Pango::Layout::ALIGN_CENTER)
     layout.text = Time.now.to_s
-    @drawable.draw_layout(@gc, 0, height/2, layout, Color["red"])
+    drawable.draw_layout(gc, 0, height/2, layout, Color["red"])
   end
+
+  def draw_pixmap(window)
+    width, height = window.size
+    pixmap = Gdk::Pixmap.new(window, width, height, -1)
+    draw(pixmap)
+    draw_text(pixmap)
+    gc = Gdk::GC.new(window)
+    window.draw_drawable(gc,pixmap,0,0,0,0,width,height)
+  end
+
 
 end
 
