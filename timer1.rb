@@ -12,17 +12,36 @@ end
 
 class Timer
   def initialize(sec)
+    @sec = sec
     reset
   end
+
   def start
-    @start = Time.now
+    @start = Time.now - @elapse
   end
-  def remain
-    @start + @sec - Time.now
+
+  def stop
+    @elapse = Time.now - @start
   end
+
   def reset
-    @sec = sec
     @start = nil
+    @elapse = 0
+  end
+
+  def remain
+    if @start
+      @start + @sec - Time.now
+    else
+      @sec
+    end
+  end
+  def toggle
+    if @start
+      stop
+    else
+      start
+    end
   end
 end
 
@@ -49,14 +68,20 @@ class TimerWindow
   end
 
   def init_timer
+    @timer = Timer.new(100)
     @time = Time.now
     Gtk::timeout_add(10) do
       if Time.now - @time > 0.1
         draw_pixmap(@window.window)
         @time = Time.now
+        p @timer.remain
       end
       true
     end
+  end
+
+  def toggle_timer
+    @timer.toggle
   end
 
   def set_window_signal(window)
@@ -73,6 +98,7 @@ class TimerWindow
       case evt.keyval
       when Gdk::Keyval::GDK_Return
         p "ret"
+        toggle_timer
       when Gdk::Keyval::GDK_Escape
         win.unfullscreen
       when Gdk::Keyval::GDK_F11
@@ -101,16 +127,17 @@ class TimerWindow
     layout = Pango::Layout.new(context)
     layout.width = width*Pango::SCALE
     layout.set_alignment(Pango::Layout::ALIGN_CENTER)
-    layout.text = Time.now.strftime("%H:%M:%S:") + sprintf("%03d",Time.now.usec/1000)
+#    layout.text = Time.now.strftime("%H:%M:%S:") + sprintf("%03d",Time.now.usec/1000)
+    layout.text = sprintf("%07.3f",@timer.remain)
     drawable.draw_layout(gc, 0, height/2, layout, Color["white"])
   end
 
   def draw_pixmap(window)
     width, height = window.size
     pixmap = Gdk::Pixmap.new(window, width, height, -1)
+    gc = Gdk::GC.new(window)
     draw(pixmap)
     draw_text(pixmap)
-    gc = Gdk::GC.new(window)
     window.draw_drawable(gc,pixmap,0,0,0,0,width,height)
   end
 end
