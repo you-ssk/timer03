@@ -10,6 +10,22 @@ class Color
   end
 end
 
+class Timer
+  def initialize(sec)
+    reset
+  end
+  def start
+    @start = Time.now
+  end
+  def remain
+    @start + @sec - Time.now
+  end
+  def reset
+    @sec = sec
+    @start = nil
+  end
+end
+
 class TimerWindow
   def initialize(width, height)
     init_window(width, height)
@@ -23,7 +39,7 @@ class TimerWindow
     @window.set_default_size(width,height)
     @window.set_app_paintable(true)
     @window.realize
-    set_window_signal
+    set_window_signal(@window)
     @window.show_all
   end
 
@@ -35,7 +51,7 @@ class TimerWindow
   def init_timer
     @time = Time.now
     Gtk::timeout_add(10) do
-      if Time.now - @time > 1.0
+      if Time.now - @time > 0.1
         draw_pixmap(@window.window)
         @time = Time.now
       end
@@ -43,12 +59,25 @@ class TimerWindow
     end
   end
 
-  def set_window_signal
-    @window.signal_connect("destroy") do
+  def set_window_signal(window)
+    window.signal_connect("destroy") do
       Gtk.main_quit
     end
-    @window.signal_connect("expose_event") do
-      draw_pixmap(@window.window)
+    window.signal_connect("expose_event") do
+      draw_pixmap(window.window)
+    end
+    window.signal_connect("configure_event") do
+      draw_pixmap(window.window)
+    end
+    window.signal_connect("key_press_event") do |win,evt|
+      case evt.keyval
+      when Gdk::Keyval::GDK_Return
+        p "ret"
+      when Gdk::Keyval::GDK_Escape
+        win.unfullscreen
+      when Gdk::Keyval::GDK_F11
+        win.fullscreen
+      end
     end
   end
 
@@ -72,8 +101,8 @@ class TimerWindow
     layout = Pango::Layout.new(context)
     layout.width = width*Pango::SCALE
     layout.set_alignment(Pango::Layout::ALIGN_CENTER)
-    layout.text = Time.now.to_s
-    drawable.draw_layout(gc, 0, height/2, layout, Color["red"])
+    layout.text = Time.now.strftime("%H:%M:%S:") + sprintf("%03d",Time.now.usec/1000)
+    drawable.draw_layout(gc, 0, height/2, layout, Color["white"])
   end
 
   def draw_pixmap(window)
@@ -84,8 +113,6 @@ class TimerWindow
     gc = Gdk::GC.new(window)
     window.draw_drawable(gc,pixmap,0,0,0,0,width,height)
   end
-
-
 end
 
 def main
