@@ -17,29 +17,38 @@ class Timer
   end
 
   def start
-    @start = Time.now - @elapse
+    @stopped = nil
+    @start = Time.now
+    @end = @start + @sec
   end
 
   def stop
-    @elapse = Time.now - @start
+    @stopped = Time.now
+    @start = nil
   end
 
   def reset
     @start = nil
-    @elapse = 0
+    @end = nil
+    @stopped = nil
   end
 
   def remain
-    if @start
-      @start + @sec - Time.now
+    if @stopped
+      @end - @stopped
+    elsif @start
+      @end - Time.now
     else
       @sec
     end
   end
+
   def toggle
     if @start
+      p "stop"
       stop
     else
+      p "start"
       start
     end
   end
@@ -74,7 +83,6 @@ class TimerWindow
       if Time.now - @time > 0.1
         draw_pixmap(@window.window)
         @time = Time.now
-        p @timer.remain
       end
       true
     end
