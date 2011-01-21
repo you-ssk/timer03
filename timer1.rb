@@ -17,38 +17,41 @@ class Timer
   end
 
   def start
-    @stopped = nil
-    @start = Time.now
-    @end = @start + @sec
+    @state = :start
+    @start_time = Time.now
+    p @state
+  end
+
+  def pause
+    @state = :pause
+    @elapse = Time.now - @start_time + @elapse
+    p @state, @elapse
   end
 
   def stop
-    @stopped = Time.now
-    @start = nil
   end
 
   def reset
-    @start = nil
-    @end = nil
-    @stopped = nil
+    @state = :stop
+    @elapse = 0
   end
 
   def remain
-    if @stopped
-      @end - @stopped
-    elsif @start
-      @end - Time.now
-    else
+    if @state == :stop
       @sec
+    elsif @state == :start
+      @start_time + @sec - @elapse - Time.now
+    elsif @state == :pause
+      @sec - @elapse
     end
   end
 
   def toggle
-    if @start
-      p "stop"
-      stop
-    else
-      p "start"
+    if @state == :stop
+      start
+    elsif @state == :start
+      pause
+    elsif @state == :pause
       start
     end
   end
@@ -136,7 +139,7 @@ class TimerWindow
     layout.width = width*Pango::SCALE
     layout.set_alignment(Pango::Layout::ALIGN_CENTER)
 #    layout.text = Time.now.strftime("%H:%M:%S:") + sprintf("%03d",Time.now.usec/1000)
-    layout.text = sprintf("%07.3f",@timer.remain)
+    layout.text = sprintf("%05.1f",@timer.remain)
     drawable.draw_layout(gc, 0, height/2, layout, Color["white"])
   end
 
