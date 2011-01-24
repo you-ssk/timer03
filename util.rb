@@ -4,6 +4,7 @@ class Color
   @@color_table = Hash.new do |h,k|
     h[k] = Gdk::Color.parse(k)
   end
+
   def self.[](key)
     @@color_table[key]
   end
@@ -16,6 +17,7 @@ class Images
       :scaled=>nil
     }
   end
+
   def self.[](key)
     img = @@image_table[key]
     if img[:scaled]
@@ -86,7 +88,7 @@ class Timer
 
   def remain_text
     m,s = remain.to_i.divmod(60)
-    sprintf("%02d:%02d",m,s)
+    sprintf("%01d:%02d",m,s)
   end
 
   def toggle

@@ -2,34 +2,23 @@ require 'gtk2'
 require 'util'
 
 module View
-  def draw_bg(drawable)
-    gc = Gdk::GC.new(drawable)
-    width,height = drawable.size
-    gc.set_rgb_fg_color(Color["cadetblue"])
-    drawable.draw_rectangle(gc,true,0,0,width,height)
-    gc.set_rgb_fg_color(Color["#00FF00"])
-    drawable.draw_line(gc,0,0,width,height)
-    gc.set_rgb_fg_color(Color["#FF0000"])
-    drawable.draw_line(gc,width,0,0,height)
-  end
-
   def draw_bg2(drawable)
     gc = Gdk::GC.new(drawable)
     width,height = drawable.size
     gc.set_rgb_fg_color(Color["white"])
     drawable.draw_rectangle(gc,true,0,0,width,height)
     gc.set_rgb_fg_color(Color["red"])
-    step = 1.0*width/12
-    stripe = (0..width).step(step*2)
+    thickness = 1.0*width/13
+    stripe = (0..width).step(thickness*2)
     stripe.each do |s|
-      drawable.draw_rectangle(gc,true,s,0,step,height)
+      drawable.draw_rectangle(gc,true,s,0,thickness,height)
     end
   end
 
   def draw_image(drawable,filename)
+    gc = Gdk::GC.new(drawable)
     width,height = drawable.size
     pixbuf = Images.scale(filename,width/2,height/2)
-    gc = Gdk::GC.new(drawable)
     drawable.draw_pixbuf(gc,pixbuf,0,0,width/4,height/4,-1,-1,
                          Gdk::RGB::DITHER_NORMAL, 0, 0)
   end
@@ -37,6 +26,7 @@ module View
   def draw_text(drawable,remain_text)
     gc = Gdk::GC.new(drawable)
     width,height = drawable.size
+
     font = Pango::FontDescription.new("Ubuntu")
     font.absolute_size = height/2*Pango::SCALE
     context = Gdk::Pango.context
@@ -46,7 +36,12 @@ module View
     layout.set_alignment(Pango::Layout::ALIGN_CENTER)
     layout.text = remain_text
     extents = layout.pixel_extents
-    drawable.draw_layout(gc, 0, height/2-(extents[1].height/2), layout, Color["darkorange"])
+    shadow_x = 4
+    shadow_y = 3
+    x = 0
+    y = height/2-(extents[1].height/2)
+    drawable.draw_layout(gc, x+shadow_x, y+shadow_y, layout, Color["maroon"])
+    drawable.draw_layout(gc, x, y, layout, Color["darkorange"])
   end
 end
 
@@ -71,9 +66,9 @@ class TimerWindow
   end
 
   def init_timer
-    @timer = Timer.new(10)
+    @timer = Timer.new(300)
     Gtk::timeout_add(100) do
-      draw_pixmap(@window.window)
+      draw_timer(@window.window)
       true
     end
   end
@@ -96,10 +91,10 @@ class TimerWindow
       Gtk.main_quit
     end
     window.signal_connect("expose_event") do
-      draw_pixmap(window.window)
+      draw_timer(window.window)
     end
     window.signal_connect("configure_event") do
-      draw_pixmap(window.window)
+      draw_timer(window.window)
     end
     window.signal_connect("key_press_event") do |win,evt|
       case evt.keyval
@@ -115,7 +110,7 @@ class TimerWindow
     end
   end
 
-  def draw_pixmap(window)
+  def draw_timer(window)
     pixmap = get_pixmap(window)
     draw_bg2(pixmap)
     draw_image(pixmap,'picture.JPG')
