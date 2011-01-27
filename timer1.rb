@@ -1,7 +1,25 @@
 require 'gtk2'
 require 'util'
 
-module View
+class View
+  def initialize(sec)
+    @timer = Timer.new(sec)
+  end
+
+  def toggle
+    @timer.toggle
+  end
+
+  def reset
+    @timer.reset
+  end
+
+  def draw(pixmap)
+    draw_bg2(pixmap)
+    draw_image(pixmap,'picture.JPG')
+    draw_text(pixmap,@timer.remain_text)
+  end
+
   def draw_bg2(drawable)
     gc = Gdk::GC.new(drawable)
     width,height = drawable.size
@@ -46,12 +64,11 @@ module View
 end
 
 class TimerWindow
-  include View
   def initialize(width, height)
     init_window(width, height)
     init_timer
-    init_images
     @window.show_all
+    @views = [View.new(30), View.new(10)]
   end
 
   def init_window(width, height, window_type=nil)
@@ -62,28 +79,26 @@ class TimerWindow
     @window.set_app_paintable(true)
     @window.realize
     set_window_signal(@window)
-    p @window.window
   end
 
   def init_timer
-    @timer = Timer.new(300)
     Gtk::timeout_add(100) do
       draw_timer(@window.window)
       true
     end
   end
 
-  def init_images
-    Images['picture.JPG']
-  end
-
-
   def toggle_timer
-    @timer.toggle
+    @views[0].toggle
   end
 
   def reset_timer
-    @timer.reset
+    @views[0].reset
+  end
+
+  def next_timer
+    @views.each{|v| v.reset}
+    @views.push(@views.shift)
   end
 
   def set_window_signal(window)
@@ -102,6 +117,8 @@ class TimerWindow
         toggle_timer
       when Gdk::Keyval::GDK_space
         reset_timer
+      when Gdk::Keyval::GDK_n
+        next_timer
       when Gdk::Keyval::GDK_Escape
         win.unfullscreen
       when Gdk::Keyval::GDK_F11
@@ -112,9 +129,7 @@ class TimerWindow
 
   def draw_timer(window)
     pixmap = get_pixmap(window)
-    draw_bg2(pixmap)
-    draw_image(pixmap,'picture.JPG')
-    draw_text(pixmap,@timer.remain_text)
+    @views[0].draw(pixmap)
     gc = Gdk::GC.new(window)
     width, height = window.size
     window.draw_drawable(gc,pixmap,0,0,0,0,width,height)
