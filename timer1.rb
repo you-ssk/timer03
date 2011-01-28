@@ -13,14 +13,16 @@ class View
   def reset
     @timer.reset
   end
+end
 
-  def draw(pixmap)
-    draw_bg2(pixmap)
-    draw_image(pixmap,'picture.JPG')
-    draw_text(pixmap,@timer.remain_text)
+class TimerView < View
+  def draw(drawable)
+    draw_bg(drawable)
+    draw_image(drawable, 'picture.JPG')
+    draw_text(drawable, @timer.remain_text)
   end
 
-  def draw_bg2(drawable)
+  def draw_bg(drawable)
     gc = Gdk::GC.new(drawable)
     width,height = drawable.size
     gc.set_rgb_fg_color(Color["white"])
@@ -44,7 +46,6 @@ class View
   def draw_text(drawable,remain_text)
     gc = Gdk::GC.new(drawable)
     width,height = drawable.size
-
     font = Pango::FontDescription.new("Ubuntu")
     font.absolute_size = height/2*Pango::SCALE
     context = Gdk::Pango.context
@@ -63,29 +64,66 @@ class View
   end
 end
 
+class IntervalView < View
+  def draw(drawable)
+    draw_bg(drawable)
+#    draw_image(drawable, 'picture.JPG')
+    draw_text(drawable, @timer.remain_text)
+  end
+
+  def draw_bg(drawable)
+    gc = Gdk::GC.new(drawable)
+    width,height = drawable.size
+    gc.set_rgb_fg_color(Color["lawngreen"])
+    drawable.draw_rectangle(gc,true,0,0,width,height)
+  end
+
+  def draw_text(drawable,remain_text)
+    gc = Gdk::GC.new(drawable)
+    width,height = drawable.size
+    font = Pango::FontDescription.new("Ubuntu")
+    font.absolute_size = height/2*Pango::SCALE
+    context = Gdk::Pango.context
+    context.font_description = font
+    layout = Pango::Layout.new(context)
+    layout.width = width*Pango::SCALE
+    layout.set_alignment(Pango::Layout::ALIGN_CENTER)
+    layout.text = remain_text
+    extents = layout.pixel_extents
+    shadow_x = 4
+    shadow_y = 3
+    x = 0
+    y = height/2-(extents[1].height/2)
+    drawable.draw_layout(gc, x+shadow_x, y+shadow_y, layout, Color["maroon"])
+    drawable.draw_layout(gc, x, y, layout, Color["forestgreen"])
+  end
+
+end
+
 class TimerWindow
   def initialize(width, height)
-    init_window(width, height)
-    init_timer
-    @window.show_all
-    @views = [View.new(30), View.new(10)]
-  end
-
-  def init_window(width, height, window_type=nil)
     @pixmap = nil
-    window_type ||= Gtk::Window::TOPLEVEL
-    @window = Gtk::Window.new(window_type)
-    @window.set_default_size(width,height)
-    @window.set_app_paintable(true)
-    @window.realize
-    set_window_signal(@window)
+    @window = init_window(width, height)
+#    @views = [TimerView.new(30), TimerView.new(10)]
+    @views = [TimerView.new(30), IntervalView.new(10)]
+    start_timer(@window)
   end
 
-  def init_timer
+  def init_window(width, height)
+    w = Gtk::Window.new(Gtk::Window::TOPLEVEL)
+    w.set_default_size(width,height)
+    w.set_app_paintable(true)
+    w.realize
+    set_window_signal(w)
+    w
+  end
+
+  def start_timer(window)
     Gtk::timeout_add(100) do
-      draw_timer(@window.window)
+      draw_timer(window.window)
       true
     end
+    window.show_all
   end
 
   def toggle_timer
@@ -99,6 +137,23 @@ class TimerWindow
   def next_timer
     @views.each{|v| v.reset}
     @views.push(@views.shift)
+  end
+
+  def draw_timer(window)
+    pixmap = get_pixmap(window)
+    @views[0].draw(pixmap)
+    gc = Gdk::GC.new(window)
+    width, height = window.size
+    window.draw_drawable(gc,pixmap,0,0,0,0,width,height)
+  end
+
+  def get_pixmap(window)
+    if !@pixmap || @pixmap.size != window.size
+      width, height = window.size
+      @pixmap = Gdk::Pixmap.new(window, width, height, -1)
+    else
+      @pixmap
+    end
   end
 
   def set_window_signal(window)
@@ -124,23 +179,6 @@ class TimerWindow
       when Gdk::Keyval::GDK_F11
         win.fullscreen
       end
-    end
-  end
-
-  def draw_timer(window)
-    pixmap = get_pixmap(window)
-    @views[0].draw(pixmap)
-    gc = Gdk::GC.new(window)
-    width, height = window.size
-    window.draw_drawable(gc,pixmap,0,0,0,0,width,height)
-  end
-
-  def get_pixmap(window)
-    if !@pixmap || @pixmap.size != window.size
-      width, height = window.size
-      @pixmap = Gdk::Pixmap.new(window, width, height, -1)
-    else
-      @pixmap
     end
   end
 end
