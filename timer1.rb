@@ -67,7 +67,6 @@ end
 class IntervalView < View
   def draw(drawable)
     draw_bg(drawable)
-#    draw_image(drawable, 'picture.JPG')
     draw_text(drawable, @timer.remain_text)
   end
 
@@ -104,7 +103,6 @@ class TimerWindow
   def initialize(width, height)
     @pixmap = nil
     @window = init_window(width, height)
-#    @views = [TimerView.new(30), TimerView.new(10)]
     @views = [TimerView.new(30), IntervalView.new(10)]
     start_timer(@window)
   end
