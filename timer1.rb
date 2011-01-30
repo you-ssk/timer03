@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 require 'gtk2'
 require 'util'
 
@@ -67,6 +68,7 @@ end
 class IntervalView < View
   def draw(drawable)
     draw_bg(drawable)
+    draw_bg_text(drawable)
     draw_text(drawable, @timer.remain_text)
   end
 
@@ -77,10 +79,34 @@ class IntervalView < View
     drawable.draw_rectangle(gc,true,0,0,width,height)
   end
 
-  def draw_text(drawable,remain_text)
+  def draw_bg_text(drawable)
     gc = Gdk::GC.new(drawable)
     width,height = drawable.size
     font = Pango::FontDescription.new("Ubuntu")
+    font.absolute_size = height/3*Pango::SCALE
+    context = Gdk::Pango.context
+    context.font_description = font
+    layout = Pango::Layout.new(context)
+    layout.width = width*Pango::SCALE
+    layout.set_alignment(Pango::Layout::ALIGN_CENTER)
+    layout.text = "とちぎRubyKaigi03"
+#    layout.wrap = Pango::Layout::WRAP_CHAR
+    extents = layout.pixel_extents
+#    extents.each{|e| p e.to_a}
+    x = 0
+    y = height/2-(extents[1].height/2)
+    drawable.draw_layout(gc, x, y, layout, Color["white"])
+  end
+
+  def draw_text(drawable,remain_text)
+    gc = Gdk::GC.new(drawable)
+    width,height = drawable.size
+#    font = Pango::FontDescription.new("Sawasdee Bold")
+#    font = Pango::FontDescription.new("Puris")
+#    font = Pango::FontDescription.new("OpenSymbol")
+#    font = Pango::FontDescription.new("Monospace")
+#    font = Pango::FontDescription.new("Bitstream charter Bold")
+    font = Pango::FontDescription.new("Century Schoolbook L Roman")
     font.absolute_size = height/2*Pango::SCALE
     context = Gdk::Pango.context
     context.font_description = font
@@ -93,7 +119,7 @@ class IntervalView < View
     shadow_y = 3
     x = 0
     y = height/2-(extents[1].height/2)
-    drawable.draw_layout(gc, x+shadow_x, y+shadow_y, layout, Color["maroon"])
+#    drawable.draw_layout(gc, x+shadow_x, y+shadow_y, layout, Color["maroon"])
     drawable.draw_layout(gc, x, y, layout, Color["forestgreen"])
   end
 
