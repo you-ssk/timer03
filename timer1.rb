@@ -79,22 +79,39 @@ class IntervalView < View
     drawable.draw_rectangle(gc,true,0,0,width,height)
   end
 
+  def font_size(layout, w, h)
+    font = layout.font_description
+    while true
+      pixel_size = layout.pixel_size
+      if pixel_size[0] < w && pixel_size[1] < h
+        break
+      else
+        font.absolute_size = 0.9*font.size
+      end
+      layout.font_description = font
+    end
+  end
+
   def draw_bg_text(drawable)
     gc = Gdk::GC.new(drawable)
     width,height = drawable.size
     font = Pango::FontDescription.new("Ubuntu")
-    font.absolute_size = height/3*Pango::SCALE
+    font.absolute_size = height*Pango::SCALE
     context = Gdk::Pango.context
     context.font_description = font
     layout = Pango::Layout.new(context)
+    layout.font_description = font
     layout.width = width*Pango::SCALE
     layout.set_alignment(Pango::Layout::ALIGN_CENTER)
-    layout.text = "とちぎRubyKaigi03"
+#    layout.wrap = Pango::Layout::WRAP_WORD
 #    layout.wrap = Pango::Layout::WRAP_CHAR
-    extents = layout.pixel_extents
-#    extents.each{|e| p e.to_a}
+    layout.wrap = Pango::Layout::WRAP_WORD_CHAR
+    layout.text = "とちぎRuby会議 50回記念"
+    layout.text = "W"
+#    layout.text = "abc def zyzzzzz qqq"
+    font_size(layout,width,height)
     x = 0
-    y = height/2-(extents[1].height/2)
+    y = height/2-(layout.pixel_size[1]/2)
     drawable.draw_layout(gc, x, y, layout, Color["white"])
   end
 
