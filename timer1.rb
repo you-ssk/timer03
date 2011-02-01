@@ -180,6 +180,16 @@ class TimerWindow
     @views.push(@views.shift)
   end
 
+  def draw_cairo_test(window)
+    cairo_context = window.create_cairo_context
+    cairo_context.set_source_color("orange")
+#    cairo_context.scale(width/100.0, height/100.0)
+    cairo_context.set_line_width(1)
+    cairo_context.move_to(0,0)
+    cairo_context.line_to(100,100)
+    cairo_context.stroke
+  end
+
   def draw_timer(window)
     pixmap = get_pixmap(window)
     @views[0].draw(pixmap)
