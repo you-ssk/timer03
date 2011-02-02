@@ -69,6 +69,7 @@ class IntervalView < View
   def draw(drawable)
     draw_bg(drawable)
     draw_bg_text(drawable)
+    draw_cairo_test(drawable)
     draw_text(drawable, @timer.remain_text)
   end
 
@@ -77,6 +78,18 @@ class IntervalView < View
     width,height = drawable.size
     gc.set_rgb_fg_color(Color["lawngreen"])
     drawable.draw_rectangle(gc,true,0,0,width,height)
+  end
+
+  def draw_cairo_test(window)
+    cairo_context = window.create_cairo_context
+    cairo_context.set_source_color("green")
+    width, height = window.size
+    cairo_context.set_line_width(2)
+    cairo_context.move_to(width/2,height/2)
+    cairo_context.line_to(width,height/2)
+    cairo_context.arc(width/2,height/2, width/2,0, 30*Math::PI/180)
+    cairo_context.close_path()
+    cairo_context.fill
   end
 
   def font_size(layout, w, h)
@@ -178,16 +191,6 @@ class TimerWindow
   def next_timer
     @views.each{|v| v.reset}
     @views.push(@views.shift)
-  end
-
-  def draw_cairo_test(window)
-    cairo_context = window.create_cairo_context
-    cairo_context.set_source_color("orange")
-#    cairo_context.scale(width/100.0, height/100.0)
-    cairo_context.set_line_width(1)
-    cairo_context.move_to(0,0)
-    cairo_context.line_to(100,100)
-    cairo_context.stroke
   end
 
   def draw_timer(window)
