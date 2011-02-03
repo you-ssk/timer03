@@ -69,7 +69,7 @@ class IntervalView < View
   def draw(drawable)
     draw_bg(drawable)
     draw_bg_text(drawable)
-    draw_cairo_test(drawable)
+    draw_cairo_test(drawable, @timer.remain)
     draw_text(drawable, @timer.remain_text)
   end
 
@@ -80,16 +80,25 @@ class IntervalView < View
     drawable.draw_rectangle(gc,true,0,0,width,height)
   end
 
-  def draw_cairo_test(window)
-    cairo_context = window.create_cairo_context
-    cairo_context.set_source_color("green")
+  def draw_cairo_test(window,remain)
+    c = window.create_cairo_context
+    c.set_source_color("red")
     width, height = window.size
-    cairo_context.set_line_width(2)
-    cairo_context.move_to(width/2,height/2)
-    cairo_context.line_to(width,height/2)
-    cairo_context.arc(width/2,height/2, width/2,0, 30*Math::PI/180)
-    cairo_context.close_path()
-    cairo_context.fill
+    c.set_line_width(height/6)
+    step = 3
+    from = -90+step*1.5
+    to = 359+from
+    angles = from.step(to,step).to_a.map{|a| a*Math::PI/180}.each_slice(2).to_a.reverse
+    angles.each do |angle|
+      c.arc(width/2, height/2, width/4,
+            angle[0],angle[1])
+      c.stroke
+    end
+    c.set_source_color("white")
+    angle = angles[remain.to_i]
+    c.arc(width/2, height/2, width/4,
+          angle[0], angle[1])
+    c.stroke
   end
 
   def font_size(layout, w, h)
