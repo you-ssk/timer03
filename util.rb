@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 require 'gtk2'
 
 class Color
@@ -101,4 +102,85 @@ class Timer
       start(Time.now)
     end
   end
+end
+
+module Pattern
+  def background(drawable, color)
+    gc = Gdk::GC.new(drawable)
+    width,height = drawable.size
+    gc.set_rgb_fg_color(Color[color])
+    drawable.draw_rectangle(gc,true,0,0,width,height)
+  end
+
+  def draw_red_white(drawable)
+    gc = Gdk::GC.new(drawable)
+    width,height = drawable.size
+    gc.set_rgb_fg_color(Color["white"])
+    drawable.draw_rectangle(gc,true,0,0,width,height)
+    gc.set_rgb_fg_color(Color["red"])
+    thickness = 1.0*width/13
+    stripe = (0..width).step(thickness*2)
+    stripe.each do |s|
+      drawable.draw_rectangle(gc,true,s,0,thickness,height)
+    end
+  end
+
+  def draw_ring(window,remain,color)
+    c = window.create_cairo_context
+    c.set_source_color(color)
+    width, height = window.size
+    c.set_line_width(height/6)
+    step = 3
+    from = -90+step*1.5
+    to = 359+from
+    angles = from.step(to,step).to_a.map{|a| a*Math::PI/180}.each_slice(2).to_a.reverse
+    angles.each do |angle|
+      c.arc(width/2, height/2, width/4,
+            angle[0],angle[1])
+      c.stroke
+    end
+    c.set_source_color("#FFFFFF")
+    angle = angles[remain.to_i % 60]
+    c.arc(width/2, height/2, width/4,
+          angle[0], angle[1])
+    c.stroke
+  end
+
+  def draw_bg_text(drawable,color)
+    gc = Gdk::GC.new(drawable)
+    width,height = drawable.size
+    font = Pango::FontDescription.new("Ubuntu")
+    font.absolute_size = height*Pango::SCALE
+    context = Gdk::Pango.context
+    context.font_description = font
+    layout = Pango::Layout.new(context)
+    layout.font_description = font
+    layout.width = width*Pango::SCALE
+    layout.set_alignment(Pango::Layout::ALIGN_CENTER)
+#    layout.wrap = Pango::Layout::WRAP_WORD
+#    layout.wrap = Pango::Layout::WRAP_CHAR
+    layout.wrap = Pango::Layout::WRAP_WORD_CHAR
+    layout.text = "とちぎRuby会議 50回記念"
+#    layout.text = "W"
+#    layout.text = "abc def zyzzzzz qqq"
+    font_size(layout,width,height)
+    x = 0
+    y = height/2-(layout.pixel_size[1]/2)
+    drawable.draw_layout(gc, x, y, layout, Color[color])
+  end
+
+  def font_size(layout, w, h)
+    font = layout.font_description
+    while true
+      pixel_size = layout.pixel_size
+      if pixel_size[0] < w && pixel_size[1] < h
+        break
+      else
+        font.absolute_size = 0.9*font.size
+      end
+      layout.font_description = font
+    end
+  end
+
+
 end

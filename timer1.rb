@@ -17,34 +17,16 @@ class View
 end
 
 class TimerView < View
+  include Pattern
+
   def draw(drawable)
-    draw_bg(drawable)
-    draw_image(drawable, 'picture.JPG')
-    draw_text(drawable, @timer.remain_text)
+    background(drawable,"#FF3300")
+    draw_bg_text(drawable, "#CC3C48")
+    draw_ring(drawable, @timer.remain, "#95C837")
+    draw_text(drawable, @timer.remain_text, "#FFCC00")
   end
 
-  def draw_bg(drawable)
-    gc = Gdk::GC.new(drawable)
-    width,height = drawable.size
-    gc.set_rgb_fg_color(Color["white"])
-    drawable.draw_rectangle(gc,true,0,0,width,height)
-    gc.set_rgb_fg_color(Color["red"])
-    thickness = 1.0*width/13
-    stripe = (0..width).step(thickness*2)
-    stripe.each do |s|
-      drawable.draw_rectangle(gc,true,s,0,thickness,height)
-    end
-  end
-
-  def draw_image(drawable,filename)
-    gc = Gdk::GC.new(drawable)
-    width,height = drawable.size
-    pixbuf = Images.scale(filename,width/2,height/2)
-    drawable.draw_pixbuf(gc,pixbuf,0,0,width/4,height/4,-1,-1,
-                         Gdk::RGB::DITHER_NORMAL, 0, 0)
-  end
-
-  def draw_text(drawable,remain_text)
+  def draw_text(drawable,remain_text,color)
     gc = Gdk::GC.new(drawable)
     width,height = drawable.size
     font = Pango::FontDescription.new("Ubuntu")
@@ -61,80 +43,25 @@ class TimerView < View
     x = 0
     y = height/2-(extents[1].height/2)
     drawable.draw_layout(gc, x+shadow_x, y+shadow_y, layout, Color["maroon"])
-    drawable.draw_layout(gc, x, y, layout, Color["darkorange"])
+    drawable.draw_layout(gc, x, y, layout, Color[color])
   end
 end
 
 class IntervalView < View
+  include Pattern
+
   def draw(drawable)
-    draw_bg(drawable)
-    draw_bg_text(drawable)
-    draw_cairo_test(drawable, @timer.remain)
+    draw_red_white(drawable)
+    draw_image(drawable, 'picture.JPG')
     draw_text(drawable, @timer.remain_text)
   end
 
-  def draw_bg(drawable)
+  def draw_image(drawable,filename)
     gc = Gdk::GC.new(drawable)
     width,height = drawable.size
-    gc.set_rgb_fg_color(Color["lawngreen"])
-    drawable.draw_rectangle(gc,true,0,0,width,height)
-  end
-
-  def draw_cairo_test(window,remain)
-    c = window.create_cairo_context
-    c.set_source_color("red")
-    width, height = window.size
-    c.set_line_width(height/6)
-    step = 3
-    from = -90+step*1.5
-    to = 359+from
-    angles = from.step(to,step).to_a.map{|a| a*Math::PI/180}.each_slice(2).to_a.reverse
-    angles.each do |angle|
-      c.arc(width/2, height/2, width/4,
-            angle[0],angle[1])
-      c.stroke
-    end
-    c.set_source_color("white")
-    angle = angles[remain.to_i]
-    c.arc(width/2, height/2, width/4,
-          angle[0], angle[1])
-    c.stroke
-  end
-
-  def font_size(layout, w, h)
-    font = layout.font_description
-    while true
-      pixel_size = layout.pixel_size
-      if pixel_size[0] < w && pixel_size[1] < h
-        break
-      else
-        font.absolute_size = 0.9*font.size
-      end
-      layout.font_description = font
-    end
-  end
-
-  def draw_bg_text(drawable)
-    gc = Gdk::GC.new(drawable)
-    width,height = drawable.size
-    font = Pango::FontDescription.new("Ubuntu")
-    font.absolute_size = height*Pango::SCALE
-    context = Gdk::Pango.context
-    context.font_description = font
-    layout = Pango::Layout.new(context)
-    layout.font_description = font
-    layout.width = width*Pango::SCALE
-    layout.set_alignment(Pango::Layout::ALIGN_CENTER)
-#    layout.wrap = Pango::Layout::WRAP_WORD
-#    layout.wrap = Pango::Layout::WRAP_CHAR
-    layout.wrap = Pango::Layout::WRAP_WORD_CHAR
-    layout.text = "とちぎRuby会議 50回記念"
-    layout.text = "W"
-#    layout.text = "abc def zyzzzzz qqq"
-    font_size(layout,width,height)
-    x = 0
-    y = height/2-(layout.pixel_size[1]/2)
-    drawable.draw_layout(gc, x, y, layout, Color["white"])
+    pixbuf = Images.scale(filename,width/2,height/2)
+    drawable.draw_pixbuf(gc,pixbuf,0,0,width/4,height/4,-1,-1,
+                         Gdk::RGB::DITHER_NORMAL, 0, 0)
   end
 
   def draw_text(drawable,remain_text)
@@ -159,7 +86,7 @@ class IntervalView < View
     x = 0
     y = height/2-(extents[1].height/2)
 #    drawable.draw_layout(gc, x+shadow_x, y+shadow_y, layout, Color["maroon"])
-    drawable.draw_layout(gc, x, y, layout, Color["forestgreen"])
+    drawable.draw_layout(gc, x, y, layout, Color["#990000"])
   end
 
 end
@@ -168,7 +95,7 @@ class TimerWindow
   def initialize(width, height)
     @pixmap = nil
     @window = init_window(width, height)
-    @views = [TimerView.new(30), IntervalView.new(10)]
+    @views = [TimerView.new(70), IntervalView.new(10)]
     start_timer(@window)
   end
 
