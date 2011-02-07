@@ -112,12 +112,12 @@ module Pattern
     drawable.draw_rectangle(gc,true,0,0,width,height)
   end
 
-  def draw_red_white(drawable)
+  def draw_stripe(drawable, colors)
     gc = Gdk::GC.new(drawable)
     width,height = drawable.size
-    gc.set_rgb_fg_color(Color["white"])
+    gc.set_rgb_fg_color(Color[colors[0]])
     drawable.draw_rectangle(gc,true,0,0,width,height)
-    gc.set_rgb_fg_color(Color["red"])
+    gc.set_rgb_fg_color(Color[colors[1]])
     thickness = 1.0*width/13
     stripe = (0..width).step(thickness*2)
     stripe.each do |s|
@@ -125,9 +125,9 @@ module Pattern
     end
   end
 
-  def draw_ring(window,remain,color)
+  def draw_ring(window,remain,colors)
     c = window.create_cairo_context
-    c.set_source_color(color)
+    c.set_source_color(colors[0])
     width, height = window.size
     c.set_line_width(height/6)
     step = 3
@@ -139,7 +139,7 @@ module Pattern
             angle[0],angle[1])
       c.stroke
     end
-    c.set_source_color("#FFFFFF")
+    c.set_source_color(colors[1])
     angle = angles[remain.to_i % 60]
     c.arc(width/2, height/2, width/4,
           angle[0], angle[1])

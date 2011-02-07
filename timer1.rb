@@ -20,10 +20,10 @@ class TimerView < View
   include Pattern
 
   def draw(drawable)
-    background(drawable,"#FF3300")
-    draw_bg_text(drawable, "#CC3C48")
-    draw_ring(drawable, @timer.remain, "#95C837")
-    draw_text(drawable, @timer.remain_text, "#FFCC00")
+    background(drawable,"#7E3728")
+    draw_bg_text(drawable, "#7E5E50")
+    draw_ring(drawable, @timer.remain, ["#6E6F37","#E18AA2"])
+    draw_text(drawable, @timer.remain_text, "#E18AA2")
   end
 
   def draw_text(drawable,remain_text,color)
@@ -51,7 +51,7 @@ class IntervalView < View
   include Pattern
 
   def draw(drawable)
-    draw_red_white(drawable)
+    draw_stripe(drawable, ["white","red"])
     draw_image(drawable, 'picture.JPG')
     draw_text(drawable, @timer.remain_text)
   end
