@@ -18,34 +18,17 @@ end
 
 class TimerView < View
   include Pattern
-
   def draw(drawable)
     background(drawable,"#7E3728")
-    draw_bg_text(drawable, "#7E5E50")
-    draw_ring(drawable, @timer.remain, ["#6E6F37","#E18AA2"])
-    draw_text(drawable, @timer.remain_text, "#E18AA2")
-  end
-
-  def draw_text(drawable,remain_text,color)
-    gc = Gdk::GC.new(drawable)
-    width,height = drawable.size
-    font = Pango::FontDescription.new("Ubuntu")
-    font.absolute_size = height/2*Pango::SCALE
-    context = Gdk::Pango.context
-    context.font_description = font
-    layout = Pango::Layout.new(context)
-    layout.width = width*Pango::SCALE
-    layout.set_alignment(Pango::Layout::ALIGN_CENTER)
-    layout.text = remain_text
-    extents = layout.pixel_extents
-    shadow_x = 4
-    shadow_y = 3
-    x = 0
-    y = height/2-(extents[1].height/2)
-    drawable.draw_layout(gc, x+shadow_x, y+shadow_y, layout, Color["maroon"])
-    drawable.draw_layout(gc, x, y, layout, Color[color])
+    draw_text(drawable, "とちぎRuby会議\n50回記念", ["#7E3728","#7E5E50"])
+    remain = @timer.remain
+    remain_text = @timer.remain_text(remain)
+    draw_ring(drawable, remain, ["#6E6F37","#E18AA2"])
+    draw_text(drawable, remain_text, ["#FF9900","#FFCC00"])
+#    draw_text(drawable, remain_text, ["#FF9900"])
   end
 end
+
 
 class IntervalView < View
   include Pattern
@@ -53,7 +36,7 @@ class IntervalView < View
   def draw(drawable)
     draw_stripe(drawable, ["white","red"])
     draw_image(drawable, 'picture.JPG')
-    draw_text(drawable, @timer.remain_text)
+    draw_text(drawable, @timer.remain_text, ["#990000"])
   end
 
   def draw_image(drawable,filename)
@@ -63,32 +46,6 @@ class IntervalView < View
     drawable.draw_pixbuf(gc,pixbuf,0,0,width/4,height/4,-1,-1,
                          Gdk::RGB::DITHER_NORMAL, 0, 0)
   end
-
-  def draw_text(drawable,remain_text)
-    gc = Gdk::GC.new(drawable)
-    width,height = drawable.size
-#    font = Pango::FontDescription.new("Sawasdee Bold")
-#    font = Pango::FontDescription.new("Puris")
-#    font = Pango::FontDescription.new("OpenSymbol")
-#    font = Pango::FontDescription.new("Monospace")
-#    font = Pango::FontDescription.new("Bitstream charter Bold")
-    font = Pango::FontDescription.new("Century Schoolbook L Roman")
-    font.absolute_size = height/2*Pango::SCALE
-    context = Gdk::Pango.context
-    context.font_description = font
-    layout = Pango::Layout.new(context)
-    layout.width = width*Pango::SCALE
-    layout.set_alignment(Pango::Layout::ALIGN_CENTER)
-    layout.text = remain_text
-    extents = layout.pixel_extents
-    shadow_x = 4
-    shadow_y = 3
-    x = 0
-    y = height/2-(extents[1].height/2)
-#    drawable.draw_layout(gc, x+shadow_x, y+shadow_y, layout, Color["maroon"])
-    drawable.draw_layout(gc, x, y, layout, Color["#990000"])
-  end
-
 end
 
 class TimerWindow

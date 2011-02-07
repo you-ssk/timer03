@@ -87,7 +87,8 @@ class Timer
     end
   end
 
-  def remain_text
+  def remain_text(fsec=nil)
+    r = fsec ? fsec : remain
     m,s = remain.to_i.divmod(60)
     sprintf("%01d:%02d",m,s)
   end
@@ -146,7 +147,7 @@ module Pattern
     c.stroke
   end
 
-  def draw_bg_text(drawable,color)
+  def draw_text(drawable,text,colors)
     gc = Gdk::GC.new(drawable)
     width,height = drawable.size
     font = Pango::FontDescription.new("Ubuntu")
@@ -157,16 +158,17 @@ module Pattern
     layout.font_description = font
     layout.width = width*Pango::SCALE
     layout.set_alignment(Pango::Layout::ALIGN_CENTER)
-#    layout.wrap = Pango::Layout::WRAP_WORD
-#    layout.wrap = Pango::Layout::WRAP_CHAR
     layout.wrap = Pango::Layout::WRAP_WORD_CHAR
-    layout.text = "とちぎRuby会議 50回記念"
-#    layout.text = "W"
-#    layout.text = "abc def zyzzzzz qqq"
+    layout.text = text
     font_size(layout,width,height)
+    shadow_x = 4
+    shadow_y = 3
     x = 0
     y = height/2-(layout.pixel_size[1]/2)
-    drawable.draw_layout(gc, x, y, layout, Color[color])
+    if colors[1]
+      drawable.draw_layout(gc, x+shadow_x, y+shadow_y, layout, Color[colors[1]])
+    end
+    drawable.draw_layout(gc, x, y, layout, Color[colors[0]])
   end
 
   def font_size(layout, w, h)
