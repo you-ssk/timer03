@@ -89,7 +89,7 @@ class Timer
 
   def remain_text(fsec=nil)
     r = fsec ? fsec : remain
-    m,s = remain.to_i.divmod(60)
+    m,s = r.to_i.divmod(60)
     sprintf("%01d:%02d",m,s)
   end
 
@@ -106,7 +106,7 @@ class Timer
 end
 
 module Pattern
-  def background(drawable, color)
+  def fill(drawable, color)
     gc = Gdk::GC.new(drawable)
     width,height = drawable.size
     gc.set_rgb_fg_color(Color[color])

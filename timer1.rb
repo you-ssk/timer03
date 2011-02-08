@@ -18,14 +18,20 @@ end
 
 class TimerView < View
   include Pattern
+
   def draw(drawable)
-    background(drawable,"#7E3728")
-    draw_text(drawable, "とちぎRuby会議\n50回記念", ["#7E3728","#7E5E50"])
     remain = @timer.remain
     remain_text = @timer.remain_text(remain)
-    draw_ring(drawable, remain, ["#6E6F37","#E18AA2"])
-    draw_text(drawable, remain_text, ["#FF9900","#FFCC00"])
-#    draw_text(drawable, remain_text, ["#FF9900"])
+    if remain > 6
+      fill(drawable,"#7E3728")
+      draw_text(drawable, "とちぎRuby会議\n50回記念", ["#7E3728","#7E5E50"])
+      draw_ring(drawable, remain, ["#6E6F37","#E18AA2"])
+      draw_text(drawable, remain_text, ["#FF9900","#FFCC00"])
+    else
+      fill(drawable,"white")
+      draw_text(drawable, "拍手\n準備", ["#7E3728","#7E5E50"])
+      draw_text(drawable, sprintf("%1d",remain), ["#FF9900","#FFCC00"])
+    end
   end
 end
 
@@ -52,7 +58,7 @@ class TimerWindow
   def initialize(width, height)
     @pixmap = nil
     @window = init_window(width, height)
-    @views = [TimerView.new(70), IntervalView.new(10)]
+    @views = [TimerView.new(10), IntervalView.new(10)]
     start_timer(@window)
   end
 
