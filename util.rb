@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 require 'gtk2'
+require 'drb/drb'
 
 class Color
   @@color_table = Hash.new do |h,k|
@@ -183,6 +184,38 @@ module Pattern
       layout.font_description = font
     end
   end
+end
 
-
+class Order
+  def initialize
+    @h = Hash.new
+    ent = {
+      1=>{:name=>"track8",:title=>"Darkness on the Edge of Gunma"},
+      2=>{:name=>"りっく",:title=>"去年の社会人一年生のRuby研修"},
+      3=>{:name=>"Glass_saga",:title=>"Reudy on Ruby1.9"},
+      4=>{:name=>"坪井創吾",:title=>"タイトル未定"},
+      5=>{:name=>"樽家昌也",:title=>"タイトル未定"},
+      6=>{:name=>"五十嵐邦明",:title=>"北陸.rb x 高専カンファレンス"}
+    }
+    entry(ent)
+  end
+  def entry(h)
+    @h = h
+  end
+  def [](key)
+    @h[key]
+  end
+  def []=(key,val)
+    @h[key]=val
+  end
+  def to_hash
+    @h
+  end
+  def order(o)
+    tmp = Hash.new
+    o.each_with_index do |e,i|
+      tmp[i+1] = @h[e]
+    end
+    @h = tmp
+  end
 end

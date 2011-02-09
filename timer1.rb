@@ -3,8 +3,9 @@ require 'gtk2'
 require 'util'
 
 class View
-  def initialize(sec)
+  def initialize(sec,order)
     @timer = Timer.new(sec)
+    @order = order
   end
 
   def toggle
@@ -13,6 +14,10 @@ class View
 
   def reset
     @timer.reset
+  end
+
+  def order(n)
+    @order[n]
   end
 end
 
@@ -41,7 +46,9 @@ class IntervalView < View
 
   def draw(drawable)
     draw_stripe(drawable, ["white","red"])
-    draw_image(drawable, 'picture.JPG')
+#    draw_text(drawable, "とちぎRuby会議\n50回記念", ["grey"])
+    draw_text(drawable, order(2)[:name], ["grey"])
+#    draw_image(drawable, 'picture.JPG')
     draw_text(drawable, @timer.remain_text, ["#990000"])
   end
 
@@ -55,10 +62,11 @@ class IntervalView < View
 end
 
 class TimerWindow
-  def initialize(width, height)
+  def initialize(width, height, order)
+    @order = order
     @pixmap = nil
     @window = init_window(width, height)
-    @views = [TimerView.new(10), IntervalView.new(10)]
+    @views = [TimerView.new(10,@order), IntervalView.new(10,@order)]
     start_timer(@window)
   end
 
@@ -137,8 +145,11 @@ class TimerWindow
 end
 
 def main
+  order = Order.new
+  DRb.start_service('druby://:12345',order)
+  order.to_hash.sort.each{|e| p e.to_a}
   Gtk.init
-  timer = TimerWindow.new(400,300)
+  timer = TimerWindow.new(400,300,order)
   Gtk.main
 end
 
