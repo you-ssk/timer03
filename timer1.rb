@@ -19,6 +19,10 @@ class View
   def order(n)
     @order[n]
   end
+
+  def now
+    @order.now
+  end
 end
 
 class TimerView < View
@@ -27,7 +31,7 @@ class TimerView < View
   def draw(drawable)
     remain = @timer.remain
     remain_text = @timer.remain_text(remain)
-    if remain > 6
+    if remain > 4
       fill(drawable,"#7E3728")
       draw_text(drawable, "とちぎRuby会議\n50回記念", ["#7E3728","#7E5E50"])
       draw_ring(drawable, remain, ["#6E6F37","#E18AA2"])
@@ -47,9 +51,9 @@ class IntervalView < View
   def draw(drawable)
     draw_stripe(drawable, ["white","red"])
 #    draw_text(drawable, "とちぎRuby会議\n50回記念", ["grey"])
-    draw_text(drawable, order(2)[:name], ["grey"])
-#    draw_image(drawable, 'picture.JPG')
-    draw_text(drawable, @timer.remain_text, ["#990000"])
+    draw_image(drawable, 'picture.JPG')
+    draw_text(drawable, @timer.remain_text, ["#ffb6c1"])
+    draw_text(drawable, now[:name]+"\n"+now[:title], ["black"])
   end
 
   def draw_image(drawable,filename)
@@ -66,7 +70,7 @@ class TimerWindow
     @order = order
     @pixmap = nil
     @window = init_window(width, height)
-    @views = [TimerView.new(10,@order), IntervalView.new(10,@order)]
+    @views = [IntervalView.new(10,@order), TimerView.new(10,@order)]
     start_timer(@window)
   end
 
@@ -98,6 +102,17 @@ class TimerWindow
   def next_timer
     @views.each{|v| v.reset}
     @views.push(@views.shift)
+    if @views[0].class == IntervalView
+      @order.next
+    end
+  end
+
+  def prev_timer
+    @views.each{|v| v.reset}
+    @views.unshift(@views.pop)
+    if @views[0].class == IntervalView
+      @order.prev
+    end
   end
 
   def draw_timer(window)
@@ -135,6 +150,8 @@ class TimerWindow
         reset_timer
       when Gdk::Keyval::GDK_n
         next_timer
+      when Gdk::Keyval::GDK_p
+        prev_timer
       when Gdk::Keyval::GDK_Escape
         win.unfullscreen
       when Gdk::Keyval::GDK_F11
@@ -145,9 +162,15 @@ class TimerWindow
 end
 
 def main
-  order = Order.new
+  entry =
+    [{:no=>1,:name=>"track8",:title=>"Darkness on the Edge of Gunma"},
+     {:no=>2,:name=>"りっく",:title=>"去年の社会人一年生のRuby研修"},
+     {:no=>3,:name=>"Glass_saga",:title=>"Reudy on Ruby1.9"},
+     {:no=>4,:name=>"坪井創吾",:title=>"タイトル未定"},
+     {:no=>5,:name=>"樽家昌也",:title=>"タイトル未定"},
+     {:no=>6,:name=>"五十嵐邦明",:title=>"北陸.rb x 高専カンファレンス"}]
+  order = Order.new(entry)
   DRb.start_service('druby://:12345',order)
-  order.to_hash.sort.each{|e| p e.to_a}
   Gtk.init
   timer = TimerWindow.new(400,300,order)
   Gtk.main

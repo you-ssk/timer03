@@ -120,7 +120,7 @@ module Pattern
     gc.set_rgb_fg_color(Color[colors[0]])
     drawable.draw_rectangle(gc,true,0,0,width,height)
     gc.set_rgb_fg_color(Color[colors[1]])
-    thickness = 1.0*width/13
+    thickness = 1.0*width/26
     stripe = (0..width).step(thickness*2)
     stripe.each do |s|
       drawable.draw_rectangle(gc,true,s,0,thickness,height)
@@ -132,19 +132,21 @@ module Pattern
     c.set_source_color(colors[0])
     width, height = window.size
     c.set_line_width(height/6)
-    step = 3
-    from = -90+step*1.5
-    to = 359+from
-    angles = from.step(to,step).to_a.map{|a| a*Math::PI/180}.each_slice(2).to_a.reverse
+    div = 60
+    step = 360/div
+    radstep = step/2.5*Math::PI/180
+    from = -90
+    to = 360+from
+    angles = from.step(to,step).to_a.map{|a| a*Math::PI/180}.reverse
     angles.each do |angle|
       c.arc(width/2, height/2, width/4,
-            angle[0],angle[1])
+            angle-radstep,angle+radstep)
       c.stroke
     end
     c.set_source_color(colors[1])
     angle = angles[remain.to_i % 60]
     c.arc(width/2, height/2, width/4,
-          angle[0], angle[1])
+          angle-radstep,angle+radstep)
     c.stroke
   end
 
@@ -187,35 +189,22 @@ module Pattern
 end
 
 class Order
-  def initialize
-    @h = Hash.new
-    ent = {
-      1=>{:name=>"track8",:title=>"Darkness on the Edge of Gunma"},
-      2=>{:name=>"りっく",:title=>"去年の社会人一年生のRuby研修"},
-      3=>{:name=>"Glass_saga",:title=>"Reudy on Ruby1.9"},
-      4=>{:name=>"坪井創吾",:title=>"タイトル未定"},
-      5=>{:name=>"樽家昌也",:title=>"タイトル未定"},
-      6=>{:name=>"五十嵐邦明",:title=>"北陸.rb x 高専カンファレンス"}
-    }
-    entry(ent)
-  end
-  def entry(h)
-    @h = h
-  end
-  def [](key)
-    @h[key]
-  end
-  def []=(key,val)
-    @h[key]=val
-  end
-  def to_hash
-    @h
+  def initialize(entry)
+    @entry = entry
+    @order = Array.new(@entry.size){|i| i+1}
+    @current = 1
   end
   def order(o)
-    tmp = Hash.new
-    o.each_with_index do |e,i|
-      tmp[i+1] = @h[e]
-    end
-    @h = tmp
+    @order = o
+  end
+  def next
+    @current = (@current % @entry.size)+1
+  end
+  def prev
+    @current = @current - 1
+    @current = @entry.size if @current < 1
+  end
+  def now
+    @entry.find{|item| item[:no] == @order[@current-1]}
   end
 end
