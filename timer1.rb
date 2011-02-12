@@ -31,28 +31,30 @@ class TimerView < View
   def draw(drawable)
     remain = @timer.remain
     remain_text = @timer.remain_text(remain)
-    if remain > 4
-      fill(drawable,"#7E3728")
-      draw_text(drawable, "とちぎRuby会議\n50回記念", ["#7E3728","#7E5E50"])
-      draw_ring(drawable, remain, ["#6E6F37","#E18AA2"])
-      draw_text(drawable, remain_text, ["#FF9900","#FFCC00"])
+    if remain > 4 
+      fill(drawable,"#000000")
+      draw_text(drawable, "とちぎRuby会議03", ["#303030","#181818"])
+      draw_ring(drawable, remain, ["#E18494","#ff4500"])
+      draw_text(drawable, remain_text, ["#FFCC00", "#FF7A4F"])
+    elsif remain > 1
+      fill(drawable,"#FFFFCC")
+      draw_text(drawable, "拍手\n準備", ["#FFED4F","#994701"])
+      draw_text(drawable, sprintf("%1d",remain), ["#FF9900","#FFCC00"])
     else
       fill(drawable,"white")
-      draw_text(drawable, "拍手\n準備", ["#7E3728","#7E5E50"])
+      draw_text(drawable, "拍手", ["#FFED4F","#994701"])
       draw_text(drawable, sprintf("%1d",remain), ["#FF9900","#FFCC00"])
     end
   end
 end
-
 
 class IntervalView < View
   include Pattern
 
   def draw(drawable)
     draw_stripe(drawable, ["white","red"])
-#    draw_text(drawable, "とちぎRuby会議\n50回記念", ["grey"])
-    draw_image(drawable, 'picture.JPG')
-    draw_text(drawable, @timer.remain_text, ["#ffb6c1"])
+#    draw_image(drawable, 'picture.JPG')
+    draw_text(drawable, @timer.remain_text, ["#ffb6c1","#cd5c5c"])
     draw_text(drawable, now[:name]+"\n"+now[:title], ["black"])
   end
 
@@ -70,7 +72,7 @@ class TimerWindow
     @order = order
     @pixmap = nil
     @window = init_window(width, height)
-    @views = [IntervalView.new(10,@order), TimerView.new(10,@order)]
+    @views = [IntervalView.new(30,@order), TimerView.new(300,@order)]
     start_timer(@window)
   end
 

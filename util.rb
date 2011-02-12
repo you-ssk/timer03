@@ -131,22 +131,23 @@ module Pattern
     c = window.create_cairo_context
     c.set_source_color(colors[0])
     width, height = window.size
-    c.set_line_width(height/6)
-    div = 60
-    step = 360/div
-    radstep = step/2.5*Math::PI/180
+    line_width = height/7
+    radius = height/2-line_width/2
+    c.set_line_width(line_width)
     from = -90
     to = 360+from
-    angles = from.step(to,step).to_a.map{|a| a*Math::PI/180}.reverse
+    div = 60
+    step = 360/div
+    angles = from.step(to,step).map{|a| a*Math::PI/180}.reverse
     angles.each do |angle|
-      c.arc(width/2, height/2, width/4,
-            angle-radstep,angle+radstep)
+      range= step/4*Math::PI/180
+      c.arc(width/2, height/2, radius, angle-range, angle+range)
       c.stroke
     end
     c.set_source_color(colors[1])
     angle = angles[remain.to_i % 60]
-    c.arc(width/2, height/2, width/4,
-          angle-radstep,angle+radstep)
+    range= step/3*Math::PI/180
+    c.arc(width/2, height/2, radius, angle-range, angle+range)
     c.stroke
   end
 
