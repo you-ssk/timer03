@@ -14,14 +14,19 @@ end
 
 class Images
   @@image_table = Hash.new do |h,k|
-    h[k] = {
-      :org=>Gdk::Pixbuf.new(k),
-      :scaled=>nil
-    }
+    begin
+      h[k] = {
+        :org=>Gdk::Pixbuf.new(k),
+        :scaled=>nil
+      }
+    rescue GLib::FileError
+      h[k] = nil
+    end
   end
 
   def self.[](key)
     img = @@image_table[key]
+    return nil unless img
     if img[:scaled]
       img[:scaled]
     else
@@ -30,6 +35,7 @@ class Images
   end
 
   def self.scale(key,dest_width,dest_height)
+    return nil unless self[key]
     if self[key].width != dest_width
       org_image = @@image_table[key][:org]
       scale = 1.0*dest_width/org_image.width
@@ -151,9 +157,9 @@ module Pattern
     c.stroke
   end
 
-  def draw_text(drawable,text,colors)
+  def draw_text_at(drawable,text,colors,rect)
     gc = Gdk::GC.new(drawable)
-    width,height = drawable.size
+    start_x,start_y,width,height = rect[0],rect[1],rect[2],rect[3]
     font = Pango::FontDescription.new("Ubuntu")
     font.absolute_size = height*Pango::SCALE
     context = Gdk::Pango.context
@@ -167,12 +173,18 @@ module Pattern
     font_size(layout,width,height)
     shadow_x = 4
     shadow_y = 3
-    x = 0
-    y = height/2-(layout.pixel_size[1]/2)
+    x = start_x
+    y = start_y+height/2-(layout.pixel_size[1]/2)
     if colors[1]
       drawable.draw_layout(gc, x+shadow_x, y+shadow_y, layout, Color[colors[1]])
     end
     drawable.draw_layout(gc, x, y, layout, Color[colors[0]])
+  end
+
+  def draw_text(drawable,text,colors)
+    width,height = drawable.size
+    rect = [0,0,width,height]
+    draw_text_at(drawable,text,colors,rect)
   end
 
   def font_size(layout, w, h)

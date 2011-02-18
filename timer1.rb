@@ -53,16 +53,25 @@ class IntervalView < View
 
   def draw(drawable)
     draw_stripe(drawable, ["white","red"])
-#    draw_image(drawable, 'picture.JPG')
     draw_text(drawable, @timer.remain_text, ["#ffb6c1","#cd5c5c"])
-    draw_text(drawable, now[:name]+"\n"+now[:title], ["black"])
+    draw_image(drawable, now[:picture]) if now[:picture]
+    w,h = drawable.size
+    f = 0.3
+    rect = [0,0,w/1.3,h*f]
+    draw_text_at(drawable, now[:name], ["black"], rect)
+    rect = [0,h-h*f,w,h*f]
+    draw_text_at(drawable, now[:title], ["black"], rect)
   end
 
   def draw_image(drawable,filename)
+    return unless Images[filename]
     gc = Gdk::GC.new(drawable)
     width,height = drawable.size
-    pixbuf = Images.scale(filename,width/2,height/2)
-    drawable.draw_pixbuf(gc,pixbuf,0,0,width/4,height/4,-1,-1,
+    factor = 0.2
+    margin = 10
+    pixbuf = Images.scale(filename,width*factor,height*factor)
+    drawable.draw_pixbuf(gc,pixbuf,0,0,
+                         width-width*factor-margin,margin,-1,-1,
                          Gdk::RGB::DITHER_NORMAL, 0, 0)
   end
 end
@@ -86,7 +95,7 @@ class TimerWindow
   end
 
   def start_timer(window)
-    Gtk::timeout_add(100) do
+    Gtk::timeout_add(150) do
       draw_timer(window.window)
       true
     end
@@ -165,13 +174,18 @@ end
 
 def main
   entry =
-    [{:no=>1,:name=>"track8",:title=>"Darkness on the Edge of Gunma"},
-     {:no=>2,:name=>"りっく",:title=>"去年の社会人一年生のRuby研修"},
-     {:no=>3,:name=>"Glass_saga",:title=>"Reudy on Ruby1.9"},
-     {:no=>4,:name=>"坪井創吾",:title=>"タイトル未定"},
-     {:no=>5,:name=>"樽家昌也",:title=>"タイトル未定"},
-     {:no=>6,:name=>"五十嵐邦明",:title=>"北陸.rb x 高専カンファレンス"}]
+    [
+     {:no=>1,:name=>"track8",:title=>"Darkness on the Edge of Gunma",:picture=>"track8.jpg"},
+     {:no=>2,:name=>"りっく",:title=>"去年の社会人一年生のRuby研修",:picture=>"jolteon_flygon.png"},
+     {:no=>3,:name=>"Glass_saga",:title=>"Reudy on Ruby1.9",:picture=>"Glass_saga.jpg"},
+     {:no=>4,:name=>"坪井創吾",:title=>"タイトル未定",:picture=>"tsuboi.jpg"},
+     {:no=>5,:name=>"樽家昌也",:title=>"タイトル未定",:picture=>"tarui.JPG"},
+     {:no=>6,:name=>"五十嵐邦明",:title=>"北陸.rb x 高専カンファレンス",:picture=>"igaiga.jpg"}
+    ]
   order = Order.new(entry)
+  entry.each do |e|
+    Images[e[:picture]] if e[:picture]
+  end
   DRb.start_service('druby://:12345',order)
   Gtk.init
   timer = TimerWindow.new(400,300,order)
