@@ -38,7 +38,10 @@ class Images
     return nil unless self[key]
     if self[key].width != dest_width
       org_image = @@image_table[key][:org]
-      scale = 1.0*dest_width/org_image.width
+      ws = 1.0*dest_width/org_image.width
+      hs = 1.0*dest_height/org_image.height
+      scale = [ws,hs].min
+#      scale = 1.0*dest_width/org_image.width
       @@image_table[key][:scaled] = 
         org_image.scale(scale*org_image.width,scale*org_image.height)
     end

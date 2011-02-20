@@ -76,12 +76,41 @@ class IntervalView < View
   end
 end
 
+class SpView < View
+  include Pattern
+  def draw(drawable)
+    draw_stripe(drawable, ["white","red"])
+    draw_image(drawable)
+  end
+
+  def draw_image(drawable)
+    filename = 'IMGP2401.jpg'
+    return unless Images[filename]
+    gc = Gdk::GC.new(drawable)
+    width,height = drawable.size
+    margin = width*0.02
+    pixbuf = Images.scale(filename,width-margin*2,height-margin)
+    iw,ih = pixbuf.width,pixbuf.height
+    is = [(width-iw)/2,(height-ih)/2]
+    drawable.draw_pixbuf(gc,pixbuf,0,0,
+                         is[0],is[1],-1,-1,
+                         Gdk::RGB::DITHER_NORMAL, 0, 0)
+    rect = [is[0]+iw*0.6, is[1], iw*0.4, ih*0.3]
+    draw_text_at(drawable,'池澤さん',['white','red'], rect)
+    rect = [is[0]+iw*0.6, is[1]+ih*0.6, iw*0.4, ih*0.3]
+    draw_text_at(drawable,'祝還暦',['white','red'], rect)
+  end
+
+end
+
 class TimerWindow
   def initialize(width, height, order)
     @order = order
     @pixmap = nil
     @window = init_window(width, height)
     @views = [IntervalView.new(30,@order), TimerView.new(300,@order)]
+    @sp = false
+    @spview = SpView.new(19,@order)
     start_timer(@window)
   end
 
@@ -128,7 +157,11 @@ class TimerWindow
 
   def draw_timer(window)
     pixmap = get_pixmap(window)
-    @views[0].draw(pixmap)
+    if @sp
+      @spview.draw(pixmap)
+    else
+      @views[0].draw(pixmap)
+    end
     gc = Gdk::GC.new(window)
     width, height = window.size
     window.draw_drawable(gc,pixmap,0,0,0,0,width,height)
@@ -163,6 +196,8 @@ class TimerWindow
         next_timer
       when Gdk::Keyval::GDK_p
         prev_timer
+      when Gdk::Keyval::GDK_I
+        @sp = !@sp
       when Gdk::Keyval::GDK_Escape
         win.unfullscreen
       when Gdk::Keyval::GDK_F11
