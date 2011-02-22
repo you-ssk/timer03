@@ -76,7 +76,7 @@ class IntervalView < View
   end
 end
 
-class SpView < View
+class SpView
   include Pattern
   def draw(drawable)
     draw_stripe(drawable, ["white","red"])
@@ -98,7 +98,7 @@ class SpView < View
     rect = [is[0]+iw*0.6, is[1], iw*0.4, ih*0.3]
     draw_text_at(drawable,'池澤さん',['white','red'], rect)
     rect = [is[0]+iw*0.6, is[1]+ih*0.6, iw*0.4, ih*0.3]
-    draw_text_at(drawable,'祝還暦',['white','red'], rect)
+    draw_text_at(drawable,'祝♥還暦',['white','red'], rect)
   end
 
 end
@@ -110,7 +110,7 @@ class TimerWindow
     @window = init_window(width, height)
     @views = [IntervalView.new(30,@order), TimerView.new(300,@order)]
     @sp = false
-    @spview = SpView.new(19,@order)
+    @spview = SpView.new
     start_timer(@window)
   end
 
@@ -124,7 +124,7 @@ class TimerWindow
   end
 
   def start_timer(window)
-    Gtk::timeout_add(150) do
+    Gtk::timeout_add(200) do
       draw_timer(window.window)
       true
     end
@@ -214,7 +214,7 @@ def main
      {:no=>2,:name=>"りっく",:title=>"去年の社会人一年生のRuby研修",:picture=>"jolteon_flygon.png"},
      {:no=>3,:name=>"Glass_saga",:title=>"Reudy on Ruby1.9",:picture=>"Glass_saga.jpg"},
      {:no=>4,:name=>"坪井創吾",:title=>"タイトル未定",:picture=>"tsuboi.jpg"},
-     {:no=>5,:name=>"樽家昌也",:title=>"タイトル未定",:picture=>"tarui.JPG"},
+     {:no=>5,:name=>"樽家昌也",:title=>"Rubyと構文解析と私",:picture=>"tarui.JPG"},
      {:no=>6,:name=>"五十嵐邦明",:title=>"北陸.rb x 高専カンファレンス",:picture=>"igaiga.jpg"}
     ]
   order = Order.new(entry)

@@ -163,7 +163,9 @@ module Pattern
   def draw_text_at(drawable,text,colors,rect)
     gc = Gdk::GC.new(drawable)
     start_x,start_y,width,height = rect[0],rect[1],rect[2],rect[3]
-    font = Pango::FontDescription.new("Ubuntu")
+#    font = Pango::FontDescription.new("Ubuntu")
+#    font = Pango::FontDescription.new("Ubuntu Bold")
+    font = Pango::FontDescription.new("Sans Bold")
     font.absolute_size = height*Pango::SCALE
     context = Gdk::Pango.context
     context.font_description = font
