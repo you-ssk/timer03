@@ -46,7 +46,7 @@ class TimerWindow
   def initialize(width, height)
     @pixmap = nil
     @window = init_window(width, height)
-    @view = TimerView.new(20)
+    @view = TimerView.new(30)
     start_timer(@window)
   end
 
@@ -60,7 +60,7 @@ class TimerWindow
   end
 
   def start_timer(window)
-    Gtk::timeout_add(200) do
+    Gtk::timeout_add(250) do
       draw_timer(window.window)
       true
     end
@@ -109,9 +109,9 @@ class TimerWindow
     window.signal_connect("key_press_event") do |win,evt|
       case evt.keyval
       when Gdk::Keyval::GDK_plus
-        add_time(10)
+        add_time(30)
       when Gdk::Keyval::GDK_minus
-        add_time(-10)
+        add_time(-30)
       when Gdk::Keyval::GDK_Return
         toggle_timer
       when Gdk::Keyval::GDK_space
@@ -127,7 +127,7 @@ end
 
 def main
   Gtk.init
-  timer = TimerWindow.new(400,300)
+  timer = TimerWindow.new(800,600)
   Gtk.main
 end
 

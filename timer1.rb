@@ -31,7 +31,7 @@ class TimerView < View
   def draw(drawable)
     remain = @timer.remain
     remain_text = @timer.remain_text(remain)
-    if remain > 4 
+    if remain > 6
       fill(drawable,"#000000")
       draw_text(drawable, "とちぎRuby会議03", ["#303030","#181818"])
       draw_ring(drawable, remain, ["#E18494","#ff4500"])
@@ -53,7 +53,6 @@ class IntervalView < View
 
   def draw(drawable)
     draw_stripe(drawable, ["white","red"])
-    draw_text(drawable, @timer.remain_text, ["#ffb6c1","#cd5c5c"])
     draw_image(drawable, now[:picture]) if now[:picture]
     w,h = drawable.size
     f = 0.3
@@ -61,17 +60,22 @@ class IntervalView < View
     draw_text_at(drawable, now[:name], ["black"], rect)
     rect = [0,h-h*f,w,h*f]
     draw_text_at(drawable, now[:title], ["black"], rect)
+    rect = [0,h/2-h/5,w,h/2.5]
+    draw_text_at(drawable, @timer.remain_text, ["#ffb6c1","#cd5c5c"],rect)
   end
 
   def draw_image(drawable,filename)
     return unless Images[filename]
     gc = Gdk::GC.new(drawable)
     width,height = drawable.size
-    factor = 0.2
+    factor = 0.3
+    factor = 0.45 if filename == 'tsuboi2.jpg'
     margin = 10
     pixbuf = Images.scale(filename,width*factor,height*factor)
+    im = Images[filename]
+    iw,ih = im.width, im.height
     drawable.draw_pixbuf(gc,pixbuf,0,0,
-                         width-width*factor-margin,margin,-1,-1,
+                         width-iw-margin,margin,-1,-1,
                          Gdk::RGB::DITHER_NORMAL, 0, 0)
   end
 end
@@ -211,9 +215,9 @@ def main
   entry =
     [
      {:no=>1,:name=>"track8",:title=>"Darkness on the Edge of Gunma",:picture=>"track8.jpg"},
-     {:no=>2,:name=>"りっく",:title=>"去年の社会人一年生のRuby研修",:picture=>"jolteon_flygon.png"},
+     {:no=>2,:name=>"リック・サンダース",:title=>"去年の社会人一年生のRuby研修",:picture=>"jolteon_flygon.png"},
      {:no=>3,:name=>"Glass_saga",:title=>"Reudy on Ruby1.9",:picture=>"Glass_saga.jpg"},
-     {:no=>4,:name=>"坪井創吾",:title=>"タイトル未定",:picture=>"tsuboi.jpg"},
+     {:no=>4,:name=>"坪井創吾",:title=>"タイトル未定",:picture=>"tsuboi2.jpg"},
      {:no=>5,:name=>"樽家昌也",:title=>"Rubyと構文解析と私",:picture=>"tarui.JPG"},
      {:no=>6,:name=>"五十嵐邦明",:title=>"北陸.rb x 高専カンファレンス",:picture=>"igaiga.jpg"}
     ]
@@ -223,7 +227,7 @@ def main
   end
   DRb.start_service('druby://:12345',order)
   Gtk.init
-  timer = TimerWindow.new(400,300,order)
+  timer = TimerWindow.new(800,600,order)
   Gtk.main
 end
 
