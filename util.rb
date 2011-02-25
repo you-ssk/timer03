@@ -113,6 +113,11 @@ class Timer
       start(Time.now)
     end
   end
+
+  def add_time(n)
+    @sec += n
+    @sec = 0 if @sec < 0
+  end
 end
 
 module Pattern
